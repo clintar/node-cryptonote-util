@@ -8,8 +8,8 @@
 #define BLOCK_MAJOR_VERSION_1                           1
 #define BLOCK_MAJOR_VERSION_2                           3
 
-#define COIN                                            ((uint64_t)100000000) // pow(10, 8)
-#define DEFAULT_FEE                                     ((uint64_t)1000000) // pow(10, 6)
+#define COIN                                            ((uint64_t)1000000000000) // pow(10, 12)
+#define DEFAULT_FEE                                     ((uint64_t)10000000000) // pow(10, 10)
 
 
 #define CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW            60

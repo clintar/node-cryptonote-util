@@ -293,7 +293,10 @@ void address_decode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         info.GetReturnValue().Set(Nan::Undefined());
     }
     //    info.GetReturnValue().Set(Nan::Undefined());
-    
+
+    // Skip integrated payment id if exists
+    if (data.size() == 2 * sizeof(crypto::public_key) + 8)
+        data.resize(data.size() - 8);
 
     account_public_address adr;
     if (!::serialization::parse_binary(data, adr) || !crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
