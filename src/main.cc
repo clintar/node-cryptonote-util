@@ -276,7 +276,9 @@ void convert_blob_bb(const Nan::FunctionCallbackInfo<v8::Value>& info) {
         returnValue
     );
 }
-
+#define ADDRESS_KEYS_DATA_SIZE (sizeof(crypto::public_key) * 2)
+#define CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX         1 // addresses start with "1"
+#define CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX   0xE94E
 void address_decode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 
     if (info.Length() < 1)
@@ -295,21 +297,36 @@ void address_decode(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     {
         info.GetReturnValue().Set(Nan::Undefined());
     }
+
+    if (CURRENCY_PUBLIC_ADDRESS_BASE58_PREFIX != prefix && CURRENCY_PUBLIC_INTEG_ADDRESS_BASE58_PREFIX != prefix)
+    {
+      info.GetReturnValue().Set(Nan::Undefined());
+    }
+
+    if (data.size() < ADDRESS_KEYS_DATA_SIZE)
+    {
+      info.GetReturnValue().Set(Nan::Undefined());
+    }
     //    info.GetReturnValue().Set(Nan::Undefined());
     
 
+    // Skip integrated payment id if exists
+//    if (data.size() == 2 * sizeof(crypto::public_key))
+//        data.resize(2 * sizeof(crypto::public_key));
+    std::string keys_data = data.substr(0, ADDRESS_KEYS_DATA_SIZE);
+
     account_public_address adr;
-    if (!::serialization::parse_binary(data, adr) || !crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
+    if (!::serialization::parse_binary(keys_data, adr) || !crypto::check_key(adr.m_spend_public_key) || !crypto::check_key(adr.m_view_public_key))
     {
         if(data.length())
         {
-            data = uint64be_to_blob(prefix) + data;
+            data = uint64be_to_blob(prefix) + keys_data;
         }
         else
         {
             info.GetReturnValue().Set(Nan::Undefined());
         }
-             v8::Local<v8::Value> returnValue = Nan::CopyBuffer((char*)data.data(), data.size()).ToLocalChecked();
+             v8::Local<v8::Value> returnValue = Nan::CopyBuffer((char*)keys_data.data(), keys_data.size()).ToLocalChecked();
         info.GetReturnValue().Set(
             returnValue
          );
